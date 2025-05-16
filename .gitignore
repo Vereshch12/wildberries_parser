@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+*.egg-info/
+
+# Logs
+logs/
+
+# IDE
+.idea/
+*.iml
+
+# Environment
+.env
+config/*
