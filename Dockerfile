@@ -15,4 +15,5 @@ RUN if [ "$USE_AI" = "true" ]; then \
     python -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='sentence-transformers/all-MiniLM-L6-v2', cache_dir='/tmp/hf_cache')" && \
     rm -rf /tmp/hf_cache; \
 fi
+RUN rm -rf /app/logs/*
 CMD ["python", "src/main.py"]

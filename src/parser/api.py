@@ -3,26 +3,9 @@ import time
 from .config import logger
 
 def get_basket(nm_id, vol, part, basket_num=24, max_basket=30):
-    """
-    Определяет basket-XX и возвращает JSON-данные для товара.
-
-    Использует фиксированные диапазоны для vol <= 3917 (basket-01 до basket-22).
-    Для vol > 3917 использует basket-23, затем перебирает basket-24 до max_basket.
-    Возвращает кортеж (basket, json_data) или (None, None) при ошибке.
-
-    Args:
-        nm_id (int): ID товара.
-        vol (int): nm_id // 100000.
-        part (int): nm_id // 1000.
-        basket_num (int): Текущий номер корзины для перебора (начинается с 24).
-        max_basket (int): Максимальный номер корзины для перебора (по умолчанию 30).
-
-    Returns:
-        tuple: (str or None, dict or None) - имя корзины и JSON-данные или (None, None).
-    """
     logger.info(f"get_basket called with nm_id={nm_id}, vol={vol}, part={part}, basket_num={basket_num}")
 
-    # Диапазоны для basket-01 до basket-22
+    # Диапазоны для basket-01 до basket-22, полный рандом, хардкодом задается
     ranges = [
         (0, 143, "01"), (144, 287, "02"), (288, 431, "03"),
         (432, 719, "04"), (720, 1007, "05"), (1008, 1061, "06"),
@@ -38,7 +21,6 @@ def get_basket(nm_id, vol, part, basket_num=24, max_basket=30):
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/91.0.4472.124'
     }
 
-    # Определение корзины
     basket = None
     if vol <= 3917:
         logger.info(f"vol={vol} <= 3917, checking ranges")
@@ -57,7 +39,6 @@ def get_basket(nm_id, vol, part, basket_num=24, max_basket=30):
             return None, None
         basket = f"basket-{basket_num:02d}" if basket_num > 23 else "basket-23"
 
-    # Выполнение запроса
     json_url = f"https://{basket}.wbbasket.ru/vol{vol}/part{part}/{nm_id}/info/ru/card.json"
     logger.info(f"Attempting request to {json_url}")
     start_time = time.time()
@@ -77,18 +58,6 @@ def get_basket(nm_id, vol, part, basket_num=24, max_basket=30):
         return None, None
 
 def get_prices(nm_id):
-    """
-    Получает старую и новую цену товара.
-
-    Выполняет GET-запрос к https://card.wb.ru/cards/v2/detail для получения цен.
-    Возвращает кортеж (old_price, new_price) или (None, None) при ошибке.
-
-    Args:
-        nm_id (int): ID товара.
-
-    Returns:
-        tuple: (float or None, float or None) - старая и новая цена (в рублях) или (None, None).
-    """
     logger.info(f"get_prices called with nm_id={nm_id}")
     price_url = f"https://card.wb.ru/cards/v2/detail?appType=1&curr=rub&dest=-1257786&spp=30&ab_testing=false&lang=ru&nm={nm_id}"
     headers = {

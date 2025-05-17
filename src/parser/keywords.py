@@ -35,7 +35,7 @@ def extract_keywords_manual(data, title):
     return keywords
 
 def extract_keywords_ai(title, description):
-    """Извлечение 5 ключевых слов с использованием KeyBERT."""
+    """Извлечение 5 ключевых слов с использованием KeyBERT. Работает долго и не очень"""
     logger.info("Starting AI keyword extraction")
     start_time = time.time()
     try:
