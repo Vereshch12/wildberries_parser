@@ -4,9 +4,14 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        USE_AI: ${USE_AI:-false}
     volumes:
-      - ./src:/app
       - ./logs:/app/logs
       - ./config:/app/config
+    env_file:
+      - .env
     environment:
       - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app/src
+      - USE_AI=${USE_AI:-false}

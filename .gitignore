@@ -16,4 +16,3 @@ logs/
 
 # Environment
 .env
-config/*
