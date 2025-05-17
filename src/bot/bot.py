@@ -69,6 +69,9 @@ async def handle_link(message: types.Message):
 
 @dp.callback_query(lambda c: c.data.startswith('search_'))
 async def process_search_callback(callback_query: types.CallbackQuery):
+    # Подтверждаем callback немедленно
+    await callback_query.answer()
+
     nm_id = int(callback_query.data.split('_')[1])
     logger.info(f"Starting search for nm_id={nm_id}")
 
@@ -144,8 +147,6 @@ async def process_search_callback(callback_query: types.CallbackQuery):
     # Удаляем поиск из активных
     if chat_id in active_searches:
         del active_searches[chat_id]
-
-    await callback_query.answer()
 
 @dp.callback_query(lambda c: c.data.startswith('cancel_'))
 async def process_cancel_callback(callback_query: types.CallbackQuery):

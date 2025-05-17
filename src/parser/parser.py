@@ -1,5 +1,6 @@
 import os
 import time
+
 import requests
 from urllib.parse import quote
 from .config import logger
@@ -91,7 +92,13 @@ async def search_product_by_keywords(nm_id, keyword, update_message=None, keywor
         url = f"{base_url}&query={encoded_keyword}&page={page}"
         logger.info(f"Requesting search page {page} for keyword='{keyword}': {url}")
         try:
-            time.sleep(1)  # Задержка для предотвращения блокировок
+            # Асинхронная задержка вместо блокирующей
+            await asyncio.sleep(1)
+            # Проверяем отмену перед выполнением запроса
+            if cancel_event and cancel_event.is_set():
+                logger.info(f"Search cancelled for nm_id={nm_id}, keyword='{keyword}' before request")
+                return None
+
             response = requests.get(url, headers=headers, timeout=5)
             response.raise_for_status()
             data = response.json()
