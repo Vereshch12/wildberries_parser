@@ -15,7 +15,7 @@
 2. **Клонируйте репозиторий**:
    ```bash
    git clone https://github.com/Vereshch12/wildberries_parser.git
-   cd wildberries-parser-bot
+   cd wildberries_parser
    ```
 
 3. **Создайте файл `.env`**:
