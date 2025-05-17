@@ -1,32 +1,67 @@
 import os
 import time
 import shutil
+import re
 from .config import logger, STOP_WORDS
+import pymorphy2
 
 def extract_keywords_manual(data, title):
-    """Ручное извлечение ключевых слов."""
+    """Ручное извлечение ключевых слов: сначала из названия, затем из options, затем из compositions."""
     logger.info("Starting manual keyword extraction")
     start_time = time.time()
-    keywords = []
+    morph = pymorphy2.MorphAnalyzer()
+    keywords = []  # Список для сохранения порядка
+    seen_keywords = set()  # Множество для исключения дубликатов
 
-    # Сначала добавляем слова из названия
-    title_words = [word for word in title.split() if word.lower() not in STOP_WORDS and len(word) > 2]
-    logger.info(f"Extracted {len(title_words)} keywords from title: {title_words}")
-    keywords.extend(title_words)
+    # Фильтр для исключения цифр и символов
+    def is_valid_phrase(phrase):
+        return bool(re.match(r'^[а-яА-Яa-zA-Z\s]+$', phrase)) and len(phrase) > 2
 
-    # Затем добавляем слова из options
-    option_words = set()
+    # Обработка слова или фразы
+    def process_phrase(phrase):
+        phrase = phrase.strip()
+        if not is_valid_phrase(phrase) or phrase.lower() in STOP_WORDS:
+            return None
+        # Если фраза содержит пробел (словосочетание), сохраняем как есть
+        if ' ' in phrase:
+            return phrase
+        # Для одиночных слов применяем лемматизацию
+        return morph.parse(phrase)[0].normal_form
+
+    # 1. Извлекаем все слова из названия
+    title_words = title.split()
+    for word in title_words:
+        result = process_phrase(word)
+        if result and result not in seen_keywords:
+            keywords.append(result)
+            seen_keywords.add(result)
+    # Затем добавляем полное название как фразу, если оно содержит пробелы
+    if ' ' in title.strip():
+        result = process_phrase(title)
+        if result and result not in seen_keywords:
+            keywords.append(result)
+            seen_keywords.add(result)
+    logger.info(f"Extracted {len(keywords)} keywords from title: {keywords}")
+
+    # 2. Ключевые слова из options
     for opt in data.get("options", []):
         if opt["name"] in ["Особенности продукта", "Назначение киселя", "Состав"]:
-            option_words.update(opt["value"].replace(";", ",").split(", "))
-    option_words = [word for word in option_words if word.lower() not in STOP_WORDS and len(word) > 2 and word not in keywords]
-    logger.info(f"Extracted {len(option_words)} keywords from options: {option_words}")
-    keywords.extend(option_words)
+            option_phrases = opt["value"].replace(";", ",").split(", ")
+            for phrase in option_phrases:
+                result = process_phrase(phrase)
+                if result and result not in seen_keywords:
+                    keywords.append(result)
+                    seen_keywords.add(result)
+    logger.info(f"Extracted {len(keywords)} keywords after options: {keywords}")
 
-    # Добавляем слова из compositions
-    composition_words = [comp["name"] for comp in data.get("compositions", []) if comp["name"].lower() not in STOP_WORDS and len(comp["name"]) > 2 and comp["name"] not in keywords]
-    logger.info(f"Extracted {len(composition_words)} keywords from compositions: {composition_words}")
-    keywords.extend(composition_words)
+    # 3. Ключевые слова из compositions
+    for comp in data.get("compositions", []):
+        phrase = comp["name"].strip()
+        result = process_phrase(phrase)
+        if result and result not in seen_keywords:
+            keywords.append(result)
+            seen_keywords.add(result)
+    logger.info(f"Extracted {len(keywords)} keywords after compositions: {keywords}")
 
     # Ограничиваем до 10 ключевых слов
     keywords = keywords[:10]
