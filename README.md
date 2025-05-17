@@ -53,6 +53,7 @@
 - **Зависимости**:
     - `aiogram==2.25.1` (Telegram API)
     - `requests==2.28.1` (HTTP-запросы)
+    - `pymorphy2==0.9.1` — лемматизация слов
     - ИИ-режим (`USE_AI=true`): `sentence-transformers==2.2.2`, `torch==1.12.1`
 - **Модель ИИ** (для `USE_AI=true`): `sentence-transformers/all-MiniLM-L6-v2`
 
