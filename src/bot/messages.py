@@ -23,9 +23,9 @@ def format_intermediate_results(keyword, keyword_idx, total_keywords, total_prod
     if previous_results:
         message_text += "\n".join(previous_results) + "\n\n"
     message_text += (
-        f"🔎 Ключевое слово \"{keyword}\":\n"
+        f"🔎 Ключевое слово \"{keyword}\" (обновление каждые 5 страниц):\n"
         f"  • Всего товаров в выдаче: {total_products}\n"
-        f"  • Текущая страница (обновление каждые 5 страниц): {page}\n"
+        f"  • Текущая страница: {page}\n"
         f"  • Статус: Поиск продолжается, ожидайте..."
     )
     return message_text
